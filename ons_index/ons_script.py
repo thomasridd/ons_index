@@ -5,14 +5,9 @@ SEARCH_URL = "https://www.ons.gov.uk/publications/data?sortBy=release_date" \
              "&query=&filter=bulletin&filter=article&filter=compendia&size=100&page="
 ONS_URL = "https://www.ons.gov.uk/"
 
+# Set objects for required output format and method
 outputter = OnsElasticsearchIndexer()
 formatter = OnsSimpleDocFormatter()
-
-def get_search_page(page_no):
-    url = SEARCH_URL + str(page_no)
-    ons_request = urllib2.Request(url,
-                              headers={"User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/55.0.2883.95 Safari/537.36"})
-    return json.loads(urllib2.urlopen(ons_request).read())
 
 def get_search_page(page_no):
     url = SEARCH_URL + str(page_no)
@@ -32,12 +27,12 @@ def build_content(sections):
         content = content + section['title'] + '\n' + section['markdown'] + '\n'
     return content
 
-# Set up the search
+# Find results for bulletins and articles
 search = get_search_page(1)
 page_min = 1
 page_max = search['result']['paginator']['end']
-
 results = []
+
 for page_no in range(page_min, page_max + 1):
     search = get_search_page(page_no)
     try:
@@ -45,6 +40,7 @@ for page_no in range(page_min, page_max + 1):
     except:
         print("Search results failed on page ", page_no)
 
+# Populate with content
 for page_no in range(0, len(results)):
     try:
         page = get_ons_page(results[page_no]['uri'])
@@ -57,6 +53,7 @@ for page_no in range(0, len(results)):
     except:
         print("Could not parse ", page['uri'])
 
+# Output
 for doc in results:
     try:
         json = formatter.convert(doc)
