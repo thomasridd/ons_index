@@ -39,10 +39,59 @@ class OnsSimpleDocFormatter():
             else:
                 result['metaDescription'] = ''
 
-            if 'content' in doc:
-                result['content'] = doc['content']
+            if 'sections' in doc:
+                result['content'] = self.build_content(doc['sections'])
+            else:
+                result['content'] = ''
 
             return result
         except:
             return {"error", "Could not convert document"}
+
+    def build_content(self, sections):
+        content = ""
+        for section in sections:
+            content = content + section['title'] + '\n' + section['markdown'] + '\n'
+        return content
+
+class OnsCompendiumFormatter():
+    def convert(self, doc):
+        try:
+            result = {}
+            result['uri'] = doc['uri']
+            description = doc['description']
+
+            result['title'] = description['title']
+            if 'summary' in description:
+                result['summary'] = description['summary']
+            elif '_abstract' in description:
+                result['summary'] = description['_abstract']
+
+            result['releaseDate'] = description['releaseDate']
+
+            if 'edition' in description:
+                result['edition'] = description['edition']
+            else:
+                result['edition'] = 'n/a'
+
+            if 'metaDescription' in description:
+                result['metaDescription'] = description['metaDescription']
+            else:
+                result['metaDescription'] = ''
+
+            if 'sections' in doc:
+                sections = doc['sections']
+                result['content'] = self.build_content(sections=sections)
+            else:
+                result['content'] = ''
+
+            return result
+        except:
+            return {"error", "Could not convert document"}
+
+    def build_content(self,sections):
+        content = ""
+        for section in sections:
+            content = content + section['title'] + '\n' + section['markdown'] + '\n'
+        return content
 
